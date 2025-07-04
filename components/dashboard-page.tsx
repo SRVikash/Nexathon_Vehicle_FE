@@ -43,7 +43,7 @@ export default function DashboardPage() {
       >
         <div className="p-4 border-b border-sidebar-hover flex items-center justify-between">
           <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
-          <img src={APP_CONFIG.logoUrl} alt="App Logo" className="h-6 w-15" />
+            <img src={APP_CONFIG.logoUrl} alt="App Logo" className="h-6 w-15" />
             <span className="font-bold text-sidebar-text p-4">{APP_CONFIG.name}</span>
           </div>
           <Warehouse className={`h-6 w-6 text-sidebar-text ${collapsed ? "mx-auto" : "hidden"}`} />
@@ -75,18 +75,28 @@ export default function DashboardPage() {
               <Warehouse className="mr-2 h-4 w-4" />
               {!collapsed && <span>Docks</span>}
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
-              <Users className="mr-2 h-4 w-4" />
-              {!collapsed && <span>Drivers</span>}
-            </Button>
+            <Link href="/drivers" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                {!collapsed && <span>Drivers</span>}
+              </Button>
+            </Link>
             <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
               <BarChart className="mr-2 h-4 w-4" />
               {!collapsed && <span>Analytics</span>}
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
-              <Calendar className="mr-2 h-4 w-4" />
-              {!collapsed && <span>Schedule</span>}
-            </Button>
+            <Link href="/schedule" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text"
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {!collapsed && <span>Schedule</span>}
+              </Button>
+            </Link>
             <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
               <MapPin className="mr-2 h-4 w-4" />
               {!collapsed && <span>Map View</span>}

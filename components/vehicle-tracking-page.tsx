@@ -37,9 +37,8 @@ export default function VehicleTrackingPage() {
     <div className="flex h-screen bg-primary-light/20">
       {/* Sidebar */}
       <div
-        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${
-          collapsed ? "w-16" : "w-64"
-        }`}
+        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"
+          }`}
       >
         <div className="p-4 border-b border-sidebar-hover flex items-center justify-between">
           <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
