@@ -60,11 +60,11 @@ const schedulesData = [
     endTime: "10:30",
     driver: {
       id: "DRV-001",
-      name: "Sarah Miller",
-      phone: "+1 (555) 123-4567",
-      avatar: "SM",
+      name: "Vikash",
+      phone: "+91 98765 43210",
+      avatar: "V",
     },
-    company: "Global Logistics",
+    company: "Bharat Logistics",
     vehicle: "VEH-1001",
     status: "in-progress",
     priority: "high",
@@ -84,11 +84,11 @@ const schedulesData = [
     endTime: "12:00",
     driver: {
       id: "DRV-002",
-      name: "John Doe",
-      phone: "+1 (555) 234-5678",
-      avatar: "JD",
+      name: "Sai",
+      phone: "+91 90123 45678",
+      avatar: "S",
     },
-    company: "FastFreight Inc.",
+    company: "Andhra Cargo Services",
     vehicle: "VEH-1002",
     status: "scheduled",
     priority: "medium",
@@ -108,11 +108,11 @@ const schedulesData = [
     endTime: "15:00",
     driver: {
       id: "DRV-003",
-      name: "Emma Wilson",
-      phone: "+1 (555) 345-6789",
-      avatar: "EW",
+      name: "Sankalpna Mahamuni",
+      phone: "+91 91234 56789",
+      avatar: "SM",
     },
-    company: "Express Shipping",
+    company: "Mumbai Freight Movers",
     vehicle: "VEH-1003",
     status: "scheduled",
     priority: "low",
@@ -132,11 +132,11 @@ const schedulesData = [
     endTime: "10:00",
     driver: {
       id: "DRV-004",
-      name: "Robert Johnson",
-      phone: "+1 (555) 456-7890",
-      avatar: "RJ",
+      name: "Nithin Reddy",
+      phone: "+91 99887 76543",
+      avatar: "NR",
     },
-    company: "Prime Delivery",
+    company: "Hyderabad Express",
     vehicle: "VEH-1004",
     status: "completed",
     priority: "high",
@@ -156,11 +156,11 @@ const schedulesData = [
     endTime: "16:30",
     driver: {
       id: "DRV-005",
-      name: "Michael Brown",
-      phone: "+1 (555) 567-8901",
-      avatar: "MB",
+      name: "Cauvery",
+      phone: "+91 87654 32109",
+      avatar: "C",
     },
-    company: "City Movers",
+    company: "Southern Logistics",
     vehicle: "VEH-1005",
     status: "cancelled",
     priority: "medium",
@@ -169,7 +169,8 @@ const schedulesData = [
     notes: "Cancelled due to weather conditions",
     createdAt: "2024-01-11",
   },
-]
+];
+
 
 // Mock data for locations
 const locations = [
@@ -264,17 +265,17 @@ export default function SchedulePage() {
       ...newSchedule,
       driver: selectedDriver
         ? {
-            id: selectedDriver.id,
-            name: selectedDriver.name,
-            phone: "+1 (555) 000-0000", // Mock phone
-            avatar: selectedDriver.avatar,
-          }
+          id: selectedDriver.id,
+          name: selectedDriver.name,
+          phone: "+1 (555) 000-0000", // Mock phone
+          avatar: selectedDriver.avatar,
+        }
         : {
-            id: "",
-            name: "",
-            phone: "",
-            avatar: "",
-          },
+          id: "",
+          name: "",
+          phone: "",
+          avatar: "",
+        },
       vehicle: selectedDriver?.vehicle || "",
       status: "scheduled",
       createdAt: new Date().toISOString().split("T")[0],
@@ -345,9 +346,8 @@ export default function SchedulePage() {
     <div className="flex h-screen bg-primary-light/20">
       {/* Sidebar */}
       <div
-        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${
-          collapsed ? "w-16" : "w-64"
-        }`}
+        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"
+          }`}
       >
         <div className="p-4 border-b border-sidebar-hover flex items-center justify-between">
           <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
