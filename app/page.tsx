@@ -1,5 +1,10 @@
 import DashboardPage from "@/components/dashboard-page"
+import { MapProvider } from "@/providers/map-provider"
 
 export default function Home() {
-  return <DashboardPage />
+  return (
+    <MapProvider>
+      <DashboardPage />
+    </MapProvider>
+  )
 }

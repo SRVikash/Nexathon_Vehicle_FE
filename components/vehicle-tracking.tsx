@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Check, MapPin, Clock, AlertTriangle, Truck, ChevronDown, ChevronUp } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { GoogleMap, Marker, Polyline } from "@react-google-maps/api"
+import { addMinutes, format } from "date-fns"
 
 // Mock data for vehicle tracking
 const vehicles = [
@@ -26,53 +28,26 @@ const vehicles = [
       licensePlate: "XYZ-1234",
       capacity: "20 tons",
     },
-    origin: "Central Warehouse",
-    destination: "Main Distribution Center",
+    origin: "Guindy",
+    destination: "Ekkatuthangal",
     estimatedArrival: "11:15 AM",
     status: "in-transit",
-    progress: 65,
+    progress: 0,
     location: { lat: 40.7128, lng: -74.006 },
     checkpoints: [
       {
         id: 1,
-        name: "Departure",
-        location: "Central Warehouse",
+        name: "TVS Next Olympia Cyberspace",
+        location: "Guindy",
         status: "completed",
-        estimatedTime: "8:30 AM",
-        actualTime: "8:35 AM",
+        estimatedTime: "",
+        actualTime: "",
         notes: "Loaded and departed on schedule",
       },
       {
         id: 2,
-        name: "Highway Checkpoint",
-        location: "Interstate 95, Mile 42",
-        status: "completed",
-        estimatedTime: "9:15 AM",
-        actualTime: "9:20 AM",
-        notes: "Traffic flowing normally",
-      },
-      {
-        id: 3,
-        name: "City Entrance",
-        location: "Main Avenue Intersection",
-        status: "completed",
-        estimatedTime: "10:00 AM",
-        actualTime: "10:15 AM",
-        notes: "Slight delay due to construction",
-      },
-      {
-        id: 4,
-        name: "Distribution Area",
-        location: "Industrial Park Entrance",
-        status: "current",
-        estimatedTime: "10:45 AM",
-        actualTime: "10:50 AM",
-        notes: "Approaching final destination",
-      },
-      {
-        id: 5,
-        name: "Dock Arrival",
-        location: "Main Distribution Center",
+        name: "Ekkatuthangal Metro Station",
+        location: "Ekkatuthangal",
         status: "upcoming",
         estimatedTime: "11:15 AM",
         actualTime: null,
@@ -223,6 +198,7 @@ interface VehicleTrackingProps {
 export default function VehicleTracking({ preview = false }: VehicleTrackingProps) {
   const [expandedVehicle, setExpandedVehicle] = useState<string | null>("VEH-1001")
   const [selectedTab, setSelectedTab] = useState("active")
+  const [vehiclesData, setVehiclesData] = useState(vehicles);
 
   const toggleVehicle = (vehicleId: string) => {
     if (expandedVehicle === vehicleId) {
@@ -265,7 +241,163 @@ export default function VehicleTracking({ preview = false }: VehicleTrackingProp
   }
 
   // If preview mode, only show the first vehicle
-  const displayVehicles = preview ? vehicles.slice(0, 1) : vehicles
+  const displayVehicles = preview ? vehiclesData.slice(0, 1) : vehiclesData
+
+  const containerStyle = {
+    width: '100%',
+    height: '350px',
+  }
+
+  const position = {
+    lat: 13.1862,
+    lng: 80.2208,
+  }
+
+  const routeCoordinates = [
+    { lat: 13.01649, lng: 80.21481 },
+    { lat: 13.01608, lng: 80.21541 },
+    { lat: 13.01603, lng: 80.21547 },
+    { lat: 13.01589, lng: 80.21538 },
+    { lat: 13.01507, lng: 80.21484 },
+    { lat: 13.01467, lng: 80.21461 },
+    { lat: 13.01424, lng: 80.21435 },
+    { lat: 13.01248, lng: 80.21334 },
+    { lat: 13.01184, lng: 80.21287 },
+    { lat: 13.01196, lng: 80.21268 },
+    { lat: 13.01254, lng: 80.21181 },
+    { lat: 13.01257, lng: 80.21178 },
+    { lat: 13.0127, lng: 80.21154 },
+    { lat: 13.01304, lng: 80.21085 },
+    { lat: 13.01313, lng: 80.21052 },
+    { lat: 13.01315, lng: 80.21028 },
+    { lat: 13.01316, lng: 80.21018 },
+    { lat: 13.01317, lng: 80.20983 },
+    { lat: 13.01312, lng: 80.20971 },
+    { lat: 13.01297, lng: 80.20927 },
+    { lat: 13.01287, lng: 80.20879 },
+    { lat: 13.01284, lng: 80.2084 },
+    { lat: 13.01284, lng: 80.208 },
+    { lat: 13.01288, lng: 80.20776 },
+    { lat: 13.0129, lng: 80.20761 },
+    { lat: 13.01293, lng: 80.20726 },
+    { lat: 13.01298, lng: 80.20659 },
+    { lat: 13.01328, lng: 80.20539 },
+    { lat: 13.01349, lng: 80.20474 },
+    { lat: 13.01344, lng: 80.20428 },
+    { lat: 13.01272, lng: 80.20405 },
+    { lat: 13.01214, lng: 80.20404 },
+    { lat: 13.011, lng: 80.20385 },
+    { lat: 13.0096, lng: 80.20383 },
+    { lat: 13.00938, lng: 80.20351 },
+    { lat: 13.00989, lng: 80.20349 },
+    { lat: 13.01124, lng: 80.20357 },
+    { lat: 13.01203, lng: 80.20366 },
+    { lat: 13.01276, lng: 80.20396 },
+    { lat: 13.01452, lng: 80.20453 },
+    { lat: 13.01588, lng: 80.205 },
+    { lat: 13.01651, lng: 80.20503 },
+    { lat: 13.01648, lng: 80.20444 },
+    { lat: 13.01699, lng: 80.20452 },
+    { lat: 13.01696, lng: 80.2048 }
+  ];
+
+  const [vehiclePosition, setVehiclePosition] = useState(routeCoordinates[0]);
+  const [intervalId, setIntervalId] = useState<ReturnType<typeof setInterval> | null>(null);
+  const totalSegments = routeCoordinates.length - 1;
+
+  useEffect(() => {
+    return () => {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [intervalId]);
+
+  const startVehicleMovement = () => {
+
+    setVehiclesData(prevVehicles =>
+      prevVehicles.map(vehicle =>
+        vehicle.id === "VEH-1001"
+          ? {
+            ...vehicle, checkpoints: vehicle.checkpoints.map(cp => ({
+              ...cp,
+              status: cp.id === 1 ? "current" : cp.status,
+              actualTime: cp.id === 1 ? format(new Date(), "hh:mm a") : cp.actualTime,
+              estimatedTime: cp.id === 1 ? format(addMinutes(new Date(), 8), 'hh:mm a') : cp.estimatedTime, // Set first checkpoint time
+            }))
+          }
+          : vehicle
+      )
+    );
+
+    let index = 0;
+    const stepDuration = 10; // ms between frame updates
+    const stepsPerSegment = 30; // total frames between points (100 x 20ms = 2s)
+
+
+
+    function interpolate(from: any, to: any, fraction: any) {
+      return {
+        lat: from.lat + (to.lat - from.lat) * fraction,
+        lng: from.lng + (to.lng - from.lng) * fraction,
+      };
+    }
+
+    function moveToNextSegment() {
+      if (index >= routeCoordinates.length - 1) {
+        console.log("Arrived at destination");
+        setVehiclesData(prevVehicles =>
+          prevVehicles.map(vehicle =>
+            vehicle.id === "VEH-1001"
+              ? {
+                ...vehicle, checkpoints: vehicle.checkpoints.map(cp => ({
+                  ...cp,
+                  actualTime: cp.id === 2 ? format(new Date(), "hh:mm a") : cp.actualTime,
+                  status: cp.id === 2 ? "completed" : cp.status,
+                }))
+              }
+              : vehicle
+          )
+        );
+      }
+      if (index >= routeCoordinates.length - 1) return;
+
+      const from = routeCoordinates[index];
+      const to = routeCoordinates[index + 1];
+      let step = 0;
+
+      const id = setInterval(() => {
+        step++;
+        const fraction = step / stepsPerSegment;
+        const newPosition = interpolate(from, to, fraction);
+        setVehiclePosition(newPosition);
+
+        // Update progress
+        const progressPercent = Math.min(
+          100,
+          Math.floor(((index + fraction) / totalSegments) * 100)
+        );
+        setVehiclesData(prev =>
+          prev.map(vehicle =>
+            vehicle.id === "VEH-1001"
+              ? { ...vehicle, progress: progressPercent }
+              : vehicle
+          )
+        );
+
+        if (step >= stepsPerSegment) {
+          clearInterval(id);
+          index++;
+          moveToNextSegment();
+        }
+      }, stepDuration);
+    }
+
+    moveToNextSegment(); // start first segment
+  };
+
+  const check_point1 = { lat: 13.01649, lng: 80.21481 };
+  const check_point2 = { lat: 13.01696, lng: 80.2048 }
 
   return (
     <Card className="border-primary-light">
@@ -376,15 +508,14 @@ export default function VehicleTracking({ preview = false }: VehicleTrackingProp
                       {vehicle.checkpoints.map((checkpoint) => (
                         <div key={checkpoint.id} className="flex items-start gap-4 relative">
                           <div
-                            className={`flex items-center justify-center w-8 h-8 rounded-full z-10 ${
-                              checkpoint.status === "completed"
-                                ? "bg-green-100"
-                                : checkpoint.status === "current"
-                                  ? "bg-primary-light"
-                                  : checkpoint.status === "delayed"
-                                    ? "bg-yellow-100"
-                                    : "bg-slate-100"
-                            }`}
+                            className={`flex items-center justify-center w-8 h-8 rounded-full z-10 ${checkpoint.status === "completed"
+                              ? "bg-green-100"
+                              : checkpoint.status === "current"
+                                ? "bg-primary-light"
+                                : checkpoint.status === "delayed"
+                                  ? "bg-yellow-100"
+                                  : "bg-slate-100"
+                              }`}
                           >
                             {getStatusIcon(checkpoint.status)}
                           </div>
@@ -421,6 +552,62 @@ export default function VehicleTracking({ preview = false }: VehicleTrackingProp
                       ))}
                     </div>
                   </div>
+                  <GoogleMap
+                    mapContainerStyle={containerStyle}
+                    center={vehiclePosition}
+                    zoom={18}
+                  >
+                    <Marker position={check_point1}
+                      icon={{
+                        url: '/start_cp.png',
+                        scaledSize: new window.google.maps.Size(50, 50),
+                        anchor: new window.google.maps.Point(30, 30),
+                      }}
+                      label={{
+                        text: vehicle.origin,
+                        fontSize: "10px",
+                        fontWeight: "bold",
+                        color: "black",
+                      }}
+                      animation={window.google.maps.Animation.DROP}
+                    />
+                    <Marker position={vehiclePosition}
+                      icon={{
+                        url: '/truck.png',
+                        scaledSize: new window.google.maps.Size(50, 50),
+                        anchor: new window.google.maps.Point(30, 30),
+                      }}
+                      label={{
+                        text: "VEH-1001",
+                        fontSize: "10px",
+                        fontWeight: "bold",
+                        color: "black",
+                      }}
+                      animation={window.google.maps.Animation.DROP}
+                    />
+                    <Marker position={check_point2}
+                      icon={{
+                        url: '/end_cp.png',
+                        scaledSize: new window.google.maps.Size(50, 50),
+                        anchor: new window.google.maps.Point(30, 30),
+                      }}
+                      label={{
+                        text: vehicle.destination,
+                        fontSize: "10px",
+                        fontWeight: "bold",
+                        color: "black",
+                      }}
+                      animation={window.google.maps.Animation.DROP}
+                    />
+                    <Polyline path={routeCoordinates} options={{ strokeColor: '#3F72AF', strokeWeight: 4 }} />
+                  </GoogleMap>
+
+                  <button
+                    onClick={startVehicleMovement}
+                    className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow"
+                  >
+                    Start Vehicle Movement
+                  </button>
                 </div>
               )}
             </div>
