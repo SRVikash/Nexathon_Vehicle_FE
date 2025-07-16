@@ -552,55 +552,56 @@ export default function VehicleTracking({ preview = false }: VehicleTrackingProp
                       ))}
                     </div>
                   </div>
-                  <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    center={vehiclePosition}
-                    zoom={18}
-                  >
-                    <Marker position={check_point1}
-                      icon={{
-                        url: '/start_cp.png',
-                        scaledSize: new window.google.maps.Size(50, 50),
-                        anchor: new window.google.maps.Point(30, 30),
-                      }}
-                      label={{
-                        text: vehicle.origin,
-                        fontSize: "10px",
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                      animation={window.google.maps.Animation.DROP}
-                    />
-                    <Marker position={vehiclePosition}
-                      icon={{
-                        url: '/truck.png',
-                        scaledSize: new window.google.maps.Size(50, 50),
-                        anchor: new window.google.maps.Point(30, 30),
-                      }}
-                      label={{
-                        text: "VEH-1001",
-                        fontSize: "10px",
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                      animation={window.google.maps.Animation.DROP}
-                    />
-                    <Marker position={check_point2}
-                      icon={{
-                        url: '/end_cp.png',
-                        scaledSize: new window.google.maps.Size(50, 50),
-                        anchor: new window.google.maps.Point(30, 30),
-                      }}
-                      label={{
-                        text: vehicle.destination,
-                        fontSize: "10px",
-                        fontWeight: "bold",
-                        color: "black",
-                      }}
-                      animation={window.google.maps.Animation.DROP}
-                    />
-                    <Polyline path={routeCoordinates} options={{ strokeColor: '#3F72AF', strokeWeight: 4 }} />
-                  </GoogleMap>
+                  {typeof window !== "undefined" && (
+                    <GoogleMap mapContainerStyle={containerStyle} center={vehiclePosition} zoom={18}>
+                      <Marker
+                        position={check_point1}
+                        icon={{
+                          url: '/start_cp.png',
+                          scaledSize: new window.google.maps.Size(50, 50),
+                          anchor: new window.google.maps.Point(30, 30),
+                        }}
+                        label={{
+                          text: vehicle.origin,
+                          fontSize: "10px",
+                          fontWeight: "bold",
+                          color: "black",
+                        }}
+                        animation={window.google.maps.Animation.DROP}
+                      />
+                      <Marker
+                        position={vehiclePosition}
+                        icon={{
+                          url: '/truck.png',
+                          scaledSize: new window.google.maps.Size(50, 50),
+                          anchor: new window.google.maps.Point(30, 30),
+                        }}
+                        label={{
+                          text: "VEH-1001",
+                          fontSize: "10px",
+                          fontWeight: "bold",
+                          color: "black",
+                        }}
+                        animation={window.google.maps.Animation.DROP}
+                      />
+                      <Marker
+                        position={check_point2}
+                        icon={{
+                          url: '/end_cp.png',
+                          scaledSize: new window.google.maps.Size(50, 50),
+                          anchor: new window.google.maps.Point(30, 30),
+                        }}
+                        label={{
+                          text: vehicle.destination,
+                          fontSize: "10px",
+                          fontWeight: "bold",
+                          color: "black",
+                        }}
+                        animation={window.google.maps.Animation.DROP}
+                      />
+                      <Polyline path={routeCoordinates} options={{ strokeColor: '#3F72AF', strokeWeight: 4 }} />
+                    </GoogleMap>
+                  )}
 
                   <button
                     onClick={startVehicleMovement}
