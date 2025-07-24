@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   BarChart,
   Clock,
@@ -18,47 +18,181 @@ import {
   CheckCircle2,
   Clock3,
   MapPin,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import DockAllocationGrid from "@/components/dock-allocation-grid"
-import PerformanceChart from "@/components/performance-chart"
-import VehicleTracking from "@/components/vehicle-tracking"
-import { APP_CONFIG } from "@/lib/config"
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import DockAllocationGrid from "@/components/dock-allocation-grid";
+import PerformanceChart from "@/components/performance-chart";
+import VehicleTracking from "@/components/vehicle-tracking";
+import { APP_CONFIG } from "@/lib/config";
+import axios from "axios";
+
+function StatusBadge({ status }: { status: string }) {
+  switch (status.toLowerCase()) {
+    case "completed":
+      return (
+        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+          <CheckCircle2 className="mr-1 h-3 w-3" />
+          Completed
+        </Badge>
+      );
+    case "in-progress":
+    case "in progress":
+      return (
+        <Badge className="bg-primary-light text-primary hover:bg-primary-light">
+          <Clock3 className="mr-1 h-3 w-3" />
+          In Progress
+        </Badge>
+      );
+    case "delayed":
+      return (
+        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+          <AlertCircle className="mr-1 h-3 w-3" />
+          Delayed
+        </Badge>
+      );
+    case "en route":
+      return (
+        <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">
+          <Truck className="mr-1 h-3 w-3" />
+          En Route
+        </Badge>
+      );
+    default:
+      return <Badge>{status}</Badge>;
+  }
+}
+
+function formatTime(isoDate: string) {
+  const d = new Date(isoDate);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}
+
+function getEtaText(delivery: any) {
+  if (
+    delivery.status.toLowerCase() === "completed" &&
+    delivery.actual_exit_time
+  ) {
+    return formatTime(delivery.actual_exit_time);
+  }
+  if (delivery.end_time) {
+    return formatTime(delivery.end_time) + " (Est.)";
+  }
+  return "-";
+}
 
 export default function DashboardPage() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deliveries, setDeliveries] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [dockRes, deliveryRes] = await Promise.all([
+          axios.get("http://10.91.17.75:8005/dock-allocation/", {
+            params: { date: "14-06-2025" },
+          }),
+          axios.get("http://10.91.17.75:8005/recent-delivery/", {
+            params: { date: "14-06-2025" },
+          }),
+        ]);
+        // setDockData(dockRes.data);
+        setDeliveries(deliveryRes.data.data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "Error fetching data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div className="flex h-screen bg-primary-light/20">
       {/* Sidebar */}
       <div
-        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"
-          }`}
+        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${
+          collapsed ? "w-16" : "w-64"
+        }`}
       >
         <div className="p-4 border-b border-sidebar-hover flex items-center justify-between">
-          <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
+          <div
+            className={`flex items-center gap-2 ${
+              collapsed ? "hidden" : "block"
+            }`}
+          >
             <img src={APP_CONFIG.logoUrl} alt="App Logo" className="h-6 w-15" />
-            <span className="font-bold text-sidebar-text p-4">{APP_CONFIG.name}</span>
+            <span className="font-bold text-sidebar-text p-4">
+              {APP_CONFIG.name}
+            </span>
           </div>
-          <Warehouse className={`h-6 w-6 text-sidebar-text ${collapsed ? "mx-auto" : "hidden"}`} />
+          <Warehouse
+            className={`h-6 w-6 text-sidebar-text ${
+              collapsed ? "mx-auto" : "hidden"
+            }`}
+          />
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className={`${collapsed ? "mx-auto" : ""} text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text`}
+            className={`${
+              collapsed ? "mx-auto" : ""
+            } text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text`}
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
           </Button>
         </div>
         <div className="flex-1 py-4">
           <nav className="space-y-1 px-2">
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <LayoutDashboard className="mr-2 h-4 w-4" />
               {!collapsed && <span>Dashboard</span>}
             </Button>
@@ -71,7 +205,10 @@ export default function DashboardPage() {
                 {!collapsed && <span>Vehicle Tracking</span>}
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <Warehouse className="mr-2 h-4 w-4" />
               {!collapsed && <span>Docks</span>}
             </Button>
@@ -84,7 +221,10 @@ export default function DashboardPage() {
                 {!collapsed && <span>Drivers</span>}
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <BarChart className="mr-2 h-4 w-4" />
               {!collapsed && <span>Analytics</span>}
             </Button>
@@ -97,14 +237,20 @@ export default function DashboardPage() {
                 {!collapsed && <span>Schedule</span>}
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <MapPin className="mr-2 h-4 w-4" />
               {!collapsed && <span>Map View</span>}
             </Button>
           </nav>
         </div>
         <div className="border-t border-sidebar-hover p-4">
-          <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+          >
             <Settings className="mr-2 h-4 w-4" />
             {!collapsed && <span>Settings</span>}
           </Button>
@@ -122,15 +268,20 @@ export default function DashboardPage() {
       <div className="flex-1 overflow-auto bg-background">
         <header className="bg-white border-b border-primary-light p-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-primary-dark">Dashboard Overview</h1>
+            <h1 className="text-xl font-bold text-primary-dark">
+              Dashboard Overview
+            </h1>
             <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 <Clock className="inline mr-2 h-4 w-4 text-primary" />
-                {new Date().toLocaleDateString()} | {new Date().toLocaleTimeString()}
+                {new Date().toLocaleDateString()} |{" "}
+                {new Date().toLocaleTimeString()}
               </div>
               <Avatar>
                 <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                <AvatarFallback className="bg-primary text-white">OP</AvatarFallback>
+                <AvatarFallback className="bg-primary text-white">
+                  OP
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -141,41 +292,59 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Active Deliveries</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Active Deliveries
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">24</div>
-                <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+                <p className="text-xs text-muted-foreground">
+                  +2 from yesterday
+                </p>
                 <Progress value={65} className="h-1 mt-3 bg-primary-light" />
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Dock Utilization</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Dock Utilization
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">78%</div>
-                <p className="text-xs text-muted-foreground">+5% from last week</p>
+                <p className="text-xs text-muted-foreground">
+                  +5% from last week
+                </p>
                 <Progress value={78} className="h-1 mt-3 bg-primary-light" />
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Avg. Wait Time</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Avg. Wait Time
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary-dark">14 min</div>
-                <p className="text-xs text-muted-foreground">-3 min from last week</p>
+                <div className="text-2xl font-bold text-primary-dark">
+                  14 min
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  -3 min from last week
+                </p>
                 <Progress value={40} className="h-1 mt-3 bg-primary-light" />
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">On-Time Deliveries</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  On-Time Deliveries
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">92%</div>
-                <p className="text-xs text-muted-foreground">+2% from last month</p>
+                <p className="text-xs text-muted-foreground">
+                  +2% from last month
+                </p>
                 <Progress value={92} className="h-1 mt-3 bg-primary-light" />
               </CardContent>
             </Card>
@@ -184,7 +353,9 @@ export default function DashboardPage() {
           {/* Dock Allocation Section */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-primary-dark">Dock Allocation</h2>
+              <h2 className="text-lg font-semibold text-primary-dark">
+                Dock Allocation
+              </h2>
               <div className="flex items-center gap-2">
                 <Select defaultValue="today">
                   <SelectTrigger className="w-[180px] border-primary-light">
@@ -196,7 +367,11 @@ export default function DashboardPage() {
                     <SelectItem value="week">This Week</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary-light">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-primary text-primary hover:bg-primary-light"
+                >
                   <Calendar className="mr-2 h-4 w-4" />
                   View Schedule
                 </Button>
@@ -212,7 +387,9 @@ export default function DashboardPage() {
           {/* Vehicle Tracking Preview Section */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-primary-dark">Vehicle Tracking</h2>
+              <h2 className="text-lg font-semibold text-primary-dark">
+                Vehicle Tracking
+              </h2>
               <Link href="/vehicle-tracking">
                 <Button className="bg-primary hover:bg-primary-dark text-white">
                   <Truck className="mr-2 h-4 w-4" />
@@ -231,8 +408,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 border-primary-light">
               <CardHeader>
-                <CardTitle className="text-primary-dark">Recent Deliveries</CardTitle>
-                <CardDescription>Status updates and confirmation</CardDescription>
+                <CardTitle className="text-primary-dark">
+                  Recent Deliveries
+                </CardTitle>
+                <CardDescription>
+                  Status updates and confirmation
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -246,117 +427,56 @@ export default function DashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow className="border-primary-light">
-                      <TableCell className="font-medium">DEL-3921</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-primary text-white">JD</AvatarFallback>
-                          </Avatar>
-                          <span>Nithin Reddy</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>Dock A-3</TableCell>
-                      <TableCell>
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                          <CheckCircle2 className="mr-1 h-3 w-3" />
-                          Completed
-                        </Badge>
-                      </TableCell>
-                      <TableCell>10:32 AM (23 min)</TableCell>
-                    </TableRow>
-                    <TableRow className="border-primary-light">
-                      <TableCell className="font-medium">DEL-3922</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-primary text-white">SM</AvatarFallback>
-                          </Avatar>
-                          <span>Sankalpna Mahamuni</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>Dock B-1</TableCell>
-                      <TableCell>
-                        <Badge className="bg-primary-light text-primary hover:bg-primary-light">
-                          <Clock3 className="mr-1 h-3 w-3" />
-                          In Progress
-                        </Badge>
-                      </TableCell>
-                      <TableCell>11:15 AM (Est.)</TableCell>
-                    </TableRow>
-                    <TableRow className="border-primary-light">
-                      <TableCell className="font-medium">DEL-3923</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-primary text-white">RJ</AvatarFallback>
-                          </Avatar>
-                          <span>Sai</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>Dock A-1</TableCell>
-                      <TableCell>
-                        <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                          <AlertCircle className="mr-1 h-3 w-3" />
-                          Delayed
-                        </Badge>
-                      </TableCell>
-                      <TableCell>11:45 AM (+15 min)</TableCell>
-                    </TableRow>
-                    <TableRow className="border-primary-light">
-                      <TableCell className="font-medium">DEL-3924</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-primary text-white">EW</AvatarFallback>
-                          </Avatar>
-                          <span>Cauvery Kesavasamy</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>Dock C-2</TableCell>
-                      <TableCell>
-                        <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">
-                          <Truck className="mr-1 h-3 w-3" />
-                          En Route
-                        </Badge>
-                      </TableCell>
-                      <TableCell>12:30 PM (Est.)</TableCell>
-                    </TableRow>
-                    <TableRow className="border-primary-light">
-                      <TableCell className="font-medium">DEL-3925</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-primary text-white">MB</AvatarFallback>
-                          </Avatar>
-                          <span>Vikash</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>Dock B-4</TableCell>
-                      <TableCell>
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                          <CheckCircle2 className="mr-1 h-3 w-3" />
-                          Completed
-                        </Badge>
-                      </TableCell>
-                      <TableCell>10:15 AM (19 min)</TableCell>
-                    </TableRow>
+                    {deliveries.map((delivery) => (
+                      <TableRow
+                        key={delivery.delivery_id}
+                        className="border-primary-light"
+                      >
+                        <TableCell className="font-medium">
+                          {delivery.delivery_id}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="bg-primary text-white">
+                                {getInitials(delivery.driver_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{delivery.driver_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{delivery.dock}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={delivery.status} />
+                        </TableCell>
+                        <TableCell>{getEtaText(delivery)}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary-light">
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary-light"
+                >
                   View All Deliveries
                 </Button>
               </CardFooter>
             </Card>
 
+            {/* Your Performance Metrics Card unchanged */}
             <Card className="border-primary-light">
               <CardHeader>
-                <CardTitle className="text-primary-dark">Performance Metrics</CardTitle>
-                <CardDescription>Efficiency and turnaround times</CardDescription>
+                <CardTitle className="text-primary-dark">
+                  Performance Metrics
+                </CardTitle>
+                <CardDescription>
+                  Efficiency and turnaround times
+                </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Replace this with your actual PerformanceChart */}
                 <PerformanceChart />
                 <div className="space-y-4 mt-4">
                   <div>
@@ -383,7 +503,10 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary-light">
+                <Button
+                  variant="outline"
+                  className="w-full border-primary text-primary hover:bg-primary-light"
+                >
                   View Detailed Analytics
                 </Button>
               </CardFooter>
@@ -392,5 +515,5 @@ export default function DashboardPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

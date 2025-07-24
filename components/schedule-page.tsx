@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   BarChart,
   Clock,
@@ -28,14 +28,27 @@ import {
   AlertCircle,
   Clock3,
   XCircle,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -43,134 +56,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-
-// Mock data for schedules
-const schedulesData = [
-  {
-    id: "SCH-001",
-    deliveryId: "DEL-3922",
-    from: "Central Warehouse",
-    to: "Main Distribution Center",
-    dock: "A-1",
-    date: "2024-01-15",
-    time: "08:30",
-    endTime: "10:30",
-    driver: {
-      id: "DRV-001",
-      name: "Vikash",
-      phone: "+91 98765 43210",
-      avatar: "V",
-    },
-    company: "Bharat Logistics",
-    vehicle: "VEH-1001",
-    status: "in-progress",
-    priority: "high",
-    cargo: "Electronics",
-    weight: "15 tons",
-    notes: "Fragile items - handle with care",
-    createdAt: "2024-01-10",
-  },
-  {
-    id: "SCH-002",
-    deliveryId: "DEL-3923",
-    from: "East Supplier Hub",
-    to: "Main Distribution Center",
-    dock: "B-2",
-    date: "2024-01-15",
-    time: "10:00",
-    endTime: "12:00",
-    driver: {
-      id: "DRV-002",
-      name: "Sai",
-      phone: "+91 90123 45678",
-      avatar: "S",
-    },
-    company: "Andhra Cargo Services",
-    vehicle: "VEH-1002",
-    status: "scheduled",
-    priority: "medium",
-    cargo: "General Goods",
-    weight: "8 tons",
-    notes: "Standard delivery",
-    createdAt: "2024-01-12",
-  },
-  {
-    id: "SCH-003",
-    deliveryId: "DEL-3924",
-    from: "North Logistics Center",
-    to: "Main Distribution Center",
-    dock: "C-1",
-    date: "2024-01-15",
-    time: "13:00",
-    endTime: "15:00",
-    driver: {
-      id: "DRV-003",
-      name: "Sankalpna Mahamuni",
-      phone: "+91 91234 56789",
-      avatar: "SM",
-    },
-    company: "Mumbai Freight Movers",
-    vehicle: "VEH-1003",
-    status: "scheduled",
-    priority: "low",
-    cargo: "Textiles",
-    weight: "12 tons",
-    notes: "Weather dependent delivery",
-    createdAt: "2024-01-13",
-  },
-  {
-    id: "SCH-004",
-    deliveryId: "DEL-3925",
-    from: "South Distribution Hub",
-    to: "Main Distribution Center",
-    dock: "A-3",
-    date: "2024-01-14",
-    time: "09:00",
-    endTime: "10:00",
-    driver: {
-      id: "DRV-004",
-      name: "Nithin Reddy",
-      phone: "+91 99887 76543",
-      avatar: "NR",
-    },
-    company: "Hyderabad Express",
-    vehicle: "VEH-1004",
-    status: "completed",
-    priority: "high",
-    cargo: "Medical Supplies",
-    weight: "3 tons",
-    notes: "Temperature controlled",
-    createdAt: "2024-01-08",
-  },
-  {
-    id: "SCH-005",
-    deliveryId: "DEL-3926",
-    from: "West Manufacturing Plant",
-    to: "Main Distribution Center",
-    dock: "B-4",
-    date: "2024-01-16",
-    time: "14:30",
-    endTime: "16:30",
-    driver: {
-      id: "DRV-005",
-      name: "Cauvery",
-      phone: "+91 87654 32109",
-      avatar: "C",
-    },
-    company: "Southern Logistics",
-    vehicle: "VEH-1005",
-    status: "cancelled",
-    priority: "medium",
-    cargo: "Furniture",
-    weight: "20 tons",
-    notes: "Cancelled due to weather conditions",
-    createdAt: "2024-01-11",
-  },
-];
-
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
 
 // Mock data for locations
 const locations = [
@@ -182,10 +77,23 @@ const locations = [
   "Main Distribution Center",
   "Secondary Distribution Center",
   "Emergency Storage Facility",
-]
+];
 
 // Mock data for docks
-const docks = ["A-1", "A-2", "A-3", "A-4", "B-1", "B-2", "B-3", "B-4", "C-1", "C-2", "C-3", "C-4"]
+const docks = [
+  "A-1",
+  "A-2",
+  "A-3",
+  "A-4",
+  "B-1",
+  "B-2",
+  "B-3",
+  "B-4",
+  "C-1",
+  "C-2",
+  "C-3",
+  "C-4",
+];
 
 // Mock data for drivers
 const drivers = [
@@ -195,7 +103,7 @@ const drivers = [
   { id: "DRV-004", name: "Robert Johnson", avatar: "RJ", vehicle: "VEH-1004" },
   { id: "DRV-005", name: "Michael Brown", avatar: "MB", vehicle: "VEH-1005" },
   { id: "DRV-006", name: "Lisa Anderson", avatar: "LA", vehicle: "VEH-1006" },
-]
+];
 
 // Mock data for companies
 const companies = [
@@ -207,15 +115,42 @@ const companies = [
   "Metro Shipping",
   "Urban Logistics",
   "Rapid Transport",
-]
+];
+
+type Driver = {
+  id: string;
+  name: string;
+  phone: string;
+  avatar: string;
+};
+
+type Schedule = {
+  id: string;
+  deliveryId: string;
+  from: string;
+  to: string;
+  dock: string;
+  date: string;
+  time: string;
+  endTime: string;
+  driver: Driver;
+  company: string;
+  vehicle: string;
+  status: "scheduled" | "In-progress" | "Completed" | "cancelled";
+  priority: "high" | "medium" | "low";
+  cargo: string;
+  weight: string;
+  notes: string;
+  createdAt: string;
+};
 
 export default function SchedulePage() {
-  const [collapsed, setCollapsed] = useState(false)
-  const [schedules, setSchedules] = useState(schedulesData)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [dateFilter, setDateFilter] = useState("all")
-  const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [newSchedule, setNewSchedule] = useState({
     from: "",
     to: "",
@@ -229,7 +164,98 @@ export default function SchedulePage() {
     weight: "",
     priority: "medium",
     notes: "",
-  })
+  });
+
+  const parseApiSchedule = (
+    item: any,
+    index: number,
+    totalSchedules: any,
+    drivers: any
+  ) => {
+    const [dock, timeRange, date] = item.dock_and_time.split("\n");
+    const [startTime, endTime] = timeRange.split(" - ");
+
+    const match = item.driver.match(/^([^\(]+)\s\(([^)]+)\)$/);
+    const driverName = match?.[1].trim() || "";
+    const vehicle = match?.[2] || "";
+
+    const selectedDriver = drivers.find((d: any) => d.vehicle === vehicle);
+
+    const parts = item.route.split(" - ");
+    const origin = parts[0]; // "Dockyard A"
+    const destination = parts[1]; // "Chennai"
+
+    const scheduleId = `SCH-${String(totalSchedules + index + 1).padStart(
+      3,
+      "0"
+    )}`;
+    const deliveryId =
+      item.delivery_id || `DEL-${3920 + totalSchedules + index + 1}`;
+
+    const newSchedule = {
+      from: origin,
+      to: destination,
+      dock,
+      date,
+      time: startTime,
+      endTime,
+      driverId: selectedDriver?.id || "",
+      company: item.company_name,
+      cargo: item.cargo.join(", "),
+      weight: "10 Tons", // not in API
+      priority: item.priority?.toLowerCase() || "medium",
+      notes: "",
+    };
+    
+    return {
+      id: scheduleId,
+      deliveryId,
+      ...newSchedule,
+      driver: selectedDriver
+        ? {
+            id: selectedDriver.id,
+            name: selectedDriver.name,
+            phone: selectedDriver.phone || "+91 00000 00000",
+            avatar:
+              selectedDriver.avatar ||
+              selectedDriver.name.charAt(0).toUpperCase(),
+          }
+        : {
+            id: "",
+            name: driverName,
+            phone: "",
+            avatar: driverName.charAt(0).toUpperCase(),
+          },
+      vehicle,
+      status: item.status || "scheduled",
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+  };
+
+  const handleApiLoad = (apiData: any) => {
+    const mappedSchedules = apiData.map((item: any, index: number) =>
+      parseApiSchedule(item, index, schedules.length, drivers)
+    );
+    setSchedules(mappedSchedules);
+  };
+
+  useEffect(() => {
+    const fetchAllocations = async () => {
+      try {
+        const res = await axios.get("http://10.91.17.75:8005/del-schedule/", {
+          params: { date: "14-06-2025" },
+        });
+        const data = res.data.data;
+        handleApiLoad(data);
+
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching schedule:", error);
+      }
+    };
+
+    fetchAllocations();
+  }, []);
 
   // Filter schedules based on search and filters
   const filteredSchedules = schedules.filter((schedule) => {
@@ -239,25 +265,28 @@ export default function SchedulePage() {
       schedule.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
       schedule.driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       schedule.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      schedule.dock.toLowerCase().includes(searchTerm.toLowerCase())
+      schedule.dock.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || schedule.status === statusFilter
+    const matchesStatus =
+      statusFilter === "all" || schedule.status === statusFilter;
 
-    const today = new Date().toISOString().split("T")[0]
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0]
+    const today = new Date().toISOString().split("T")[0];
+    const tomorrow = new Date(Date.now() + 86400000)
+      .toISOString()
+      .split("T")[0];
     const matchesDate =
       dateFilter === "all" ||
       (dateFilter === "today" && schedule.date === today) ||
       (dateFilter === "tomorrow" && schedule.date === tomorrow) ||
-      (dateFilter === "upcoming" && schedule.date >= today)
+      (dateFilter === "upcoming" && schedule.date >= today);
 
-    return matchesSearch && matchesStatus && matchesDate
-  })
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   const handleAddSchedule = () => {
-    const selectedDriver = drivers.find((d) => d.id === newSchedule.driverId)
-    const scheduleId = `SCH-${String(schedules.length + 1).padStart(3, "0")}`
-    const deliveryId = `DEL-${String(3920 + schedules.length + 1)}`
+    const selectedDriver = drivers.find((d) => d.id === newSchedule.driverId);
+    const scheduleId = `SCH-${String(schedules.length + 1).padStart(3, "0")}`;
+    const deliveryId = `DEL-${String(3920 + schedules.length + 1)}`;
 
     const schedule = {
       id: scheduleId,
@@ -265,23 +294,23 @@ export default function SchedulePage() {
       ...newSchedule,
       driver: selectedDriver
         ? {
-          id: selectedDriver.id,
-          name: selectedDriver.name,
-          phone: "+1 (555) 000-0000", // Mock phone
-          avatar: selectedDriver.avatar,
-        }
+            id: selectedDriver.id,
+            name: selectedDriver.name,
+            phone: "+1 (555) 000-0000", // Mock phone
+            avatar: selectedDriver.avatar,
+          }
         : {
-          id: "",
-          name: "",
-          phone: "",
-          avatar: "",
-        },
+            id: "",
+            name: "",
+            phone: "",
+            avatar: "",
+          },
       vehicle: selectedDriver?.vehicle || "",
       status: "scheduled",
       createdAt: new Date().toISOString().split("T")[0],
-    }
+    };
 
-    setSchedules([...schedules, schedule])
+    setSchedules([...schedules, schedule]);
     setNewSchedule({
       from: "",
       to: "",
@@ -295,73 +324,88 @@ export default function SchedulePage() {
       weight: "",
       priority: "medium",
       notes: "",
-    })
-    setIsAddScheduleOpen(false)
-  }
+    });
+    setIsAddScheduleOpen(false);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "in-progress":
-        return "bg-primary-light text-primary border-primary-light"
+      case "Completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "In progress":
+        return "bg-primary-light text-primary border-primary-light";
       case "scheduled":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
-        return <CheckCircle2 className="h-3 w-3 mr-1" />
+        return <CheckCircle2 className="h-3 w-3 mr-1" />;
       case "in-progress":
-        return <Clock3 className="h-3 w-3 mr-1" />
+        return <Clock3 className="h-3 w-3 mr-1" />;
       case "scheduled":
-        return <Calendar className="h-3 w-3 mr-1" />
+        return <Calendar className="h-3 w-3 mr-1" />;
       case "cancelled":
-        return <XCircle className="h-3 w-3 mr-1" />
+        return <XCircle className="h-3 w-3 mr-1" />;
       default:
-        return <AlertCircle className="h-3 w-3 mr-1" />
+        return <AlertCircle className="h-3 w-3 mr-1" />;
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-100 text-red-800 border-red-200";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   return (
     <div className="flex h-screen bg-primary-light/20">
       {/* Sidebar */}
       <div
-        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"
-          }`}
+        className={`bg-sidebar border-r border-primary-dark/20 transition-all duration-300 flex flex-col ${
+          collapsed ? "w-16" : "w-64"
+        }`}
       >
         <div className="p-4 border-b border-sidebar-hover flex items-center justify-between">
-          <div className={`flex items-center gap-2 ${collapsed ? "hidden" : "block"}`}>
+          <div
+            className={`flex items-center gap-2 ${
+              collapsed ? "hidden" : "block"
+            }`}
+          >
             <Warehouse className="h-6 w-6 text-sidebar-text" />
             <span className="font-bold text-sidebar-text">DockMaster</span>
           </div>
-          <Warehouse className={`h-6 w-6 text-sidebar-text ${collapsed ? "mx-auto" : "hidden"}`} />
+          <Warehouse
+            className={`h-6 w-6 text-sidebar-text ${
+              collapsed ? "mx-auto" : "hidden"
+            }`}
+          />
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className={`${collapsed ? "mx-auto" : ""} text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text`}
+            className={`${
+              collapsed ? "mx-auto" : ""
+            } text-sidebar-text hover:bg-sidebar-hover hover:text-sidebar-text`}
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
           </Button>
         </div>
         <div className="flex-1 py-4">
@@ -384,7 +428,10 @@ export default function SchedulePage() {
                 {!collapsed && <span>Vehicle Tracking</span>}
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <Warehouse className="mr-2 h-4 w-4" />
               {!collapsed && <span>Docks</span>}
             </Button>
@@ -397,22 +444,34 @@ export default function SchedulePage() {
                 {!collapsed && <span>Drivers</span>}
               </Button>
             </Link>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <BarChart className="mr-2 h-4 w-4" />
               {!collapsed && <span>Analytics</span>}
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text bg-sidebar-hover"
+            >
               <Calendar className="mr-2 h-4 w-4" />
               {!collapsed && <span>Schedule</span>}
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+            >
               <MapPin className="mr-2 h-4 w-4" />
               {!collapsed && <span>Map View</span>}
             </Button>
           </nav>
         </div>
         <div className="border-t border-sidebar-hover p-4">
-          <Button variant="ghost" className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-sidebar-text hover:bg-sidebar-hover"
+          >
             <Settings className="mr-2 h-4 w-4" />
             {!collapsed && <span>Settings</span>}
           </Button>
@@ -432,19 +491,28 @@ export default function SchedulePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Link href="/">
-                <Button variant="ghost" size="icon" className="text-primary-dark">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-primary-dark"
+                >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <h1 className="text-xl font-bold text-primary-dark">Schedule Management</h1>
+              <h1 className="text-xl font-bold text-primary-dark">
+                Schedule Management
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 <Clock className="inline mr-2 h-4 w-4 text-primary" />
-                {new Date().toLocaleDateString()} | {new Date().toLocaleTimeString()}
+                {new Date().toLocaleDateString()} |{" "}
+                {new Date().toLocaleTimeString()}
               </div>
               <Avatar>
-                <AvatarFallback className="bg-primary text-white">OP</AvatarFallback>
+                <AvatarFallback className="bg-primary text-white">
+                  OP
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -455,42 +523,63 @@ export default function SchedulePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Total Schedules</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Total Schedules
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary-dark">{schedules.length}</div>
+                <div className="text-2xl font-bold text-primary-dark">
+                  {schedules.length}
+                </div>
                 <p className="text-xs text-muted-foreground">All time</p>
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Today's Schedules</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Today's Schedules
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">
-                  {schedules.filter((s) => s.date === new Date().toISOString().split("T")[0]).length}
+                  {
+                    schedules.filter(
+                      (s) => s.date === new Date().toISOString().split("T")[0]
+                    ).length
+                  }
                 </div>
                 <p className="text-xs text-muted-foreground">Active today</p>
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">In Progress</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  In Progress
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">
-                  {schedules.filter((s) => s.status === "in-progress").length}
+                  {schedules.filter((s) => s.status === "In-progress").length}
                 </div>
-                <p className="text-xs text-muted-foreground">Currently active</p>
+                <p className="text-xs text-muted-foreground">
+                  Currently active
+                </p>
               </CardContent>
             </Card>
             <Card className="border-primary-light">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-primary-dark">Completion Rate</CardTitle>
+                <CardTitle className="text-sm font-medium text-primary-dark">
+                  Completion Rate
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary-dark">
-                  {Math.round((schedules.filter((s) => s.status === "completed").length / schedules.length) * 100)}%
+                  {Math.round(
+                    (schedules.filter((s) => s.status === "Completed").length /
+                      schedules.length) *
+                      100
+                  )}
+                  %
                 </div>
                 <p className="text-xs text-muted-foreground">Success rate</p>
               </CardContent>
@@ -502,10 +591,17 @@ export default function SchedulePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-primary-dark">Delivery Schedules</CardTitle>
-                  <CardDescription>Manage delivery schedules and dock assignments</CardDescription>
+                  <CardTitle className="text-primary-dark">
+                    Delivery Schedules
+                  </CardTitle>
+                  <CardDescription>
+                    Manage delivery schedules and dock assignments
+                  </CardDescription>
                 </div>
-                <Dialog open={isAddScheduleOpen} onOpenChange={setIsAddScheduleOpen}>
+                <Dialog
+                  open={isAddScheduleOpen}
+                  onOpenChange={setIsAddScheduleOpen}
+                >
                   <DialogTrigger asChild>
                     <Button className="bg-primary hover:bg-primary-dark text-white">
                       <Plus className="mr-2 h-4 w-4" />
@@ -515,7 +611,9 @@ export default function SchedulePage() {
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Add New Schedule</DialogTitle>
-                      <DialogDescription>Create a new delivery schedule with dock assignment.</DialogDescription>
+                      <DialogDescription>
+                        Create a new delivery schedule with dock assignment.
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -523,7 +621,9 @@ export default function SchedulePage() {
                           <Label htmlFor="from">From Location</Label>
                           <Select
                             value={newSchedule.from}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, from: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({ ...newSchedule, from: value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select origin" />
@@ -541,7 +641,9 @@ export default function SchedulePage() {
                           <Label htmlFor="to">To Destination</Label>
                           <Select
                             value={newSchedule.to}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, to: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({ ...newSchedule, to: value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select destination" />
@@ -561,7 +663,9 @@ export default function SchedulePage() {
                           <Label htmlFor="dock">Assigned Dock</Label>
                           <Select
                             value={newSchedule.dock}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, dock: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({ ...newSchedule, dock: value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select dock" />
@@ -581,14 +685,24 @@ export default function SchedulePage() {
                             id="date"
                             type="date"
                             value={newSchedule.date}
-                            onChange={(e) => setNewSchedule({ ...newSchedule, date: e.target.value })}
+                            onChange={(e) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                date: e.target.value,
+                              })
+                            }
                           />
                         </div>
                         <div>
                           <Label htmlFor="priority">Priority</Label>
                           <Select
                             value={newSchedule.priority}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, priority: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                priority: value,
+                              })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select priority" />
@@ -608,7 +722,12 @@ export default function SchedulePage() {
                             id="time"
                             type="time"
                             value={newSchedule.time}
-                            onChange={(e) => setNewSchedule({ ...newSchedule, time: e.target.value })}
+                            onChange={(e) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                time: e.target.value,
+                              })
+                            }
                           />
                         </div>
                         <div>
@@ -617,7 +736,12 @@ export default function SchedulePage() {
                             id="endTime"
                             type="time"
                             value={newSchedule.endTime}
-                            onChange={(e) => setNewSchedule({ ...newSchedule, endTime: e.target.value })}
+                            onChange={(e) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                endTime: e.target.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -626,7 +750,12 @@ export default function SchedulePage() {
                           <Label htmlFor="driver">Assigned Driver</Label>
                           <Select
                             value={newSchedule.driverId}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, driverId: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                driverId: value,
+                              })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select driver" />
@@ -644,7 +773,9 @@ export default function SchedulePage() {
                           <Label htmlFor="company">Company</Label>
                           <Select
                             value={newSchedule.company}
-                            onValueChange={(value) => setNewSchedule({ ...newSchedule, company: value })}
+                            onValueChange={(value) =>
+                              setNewSchedule({ ...newSchedule, company: value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select company" />
@@ -665,7 +796,12 @@ export default function SchedulePage() {
                           <Input
                             id="cargo"
                             value={newSchedule.cargo}
-                            onChange={(e) => setNewSchedule({ ...newSchedule, cargo: e.target.value })}
+                            onChange={(e) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                cargo: e.target.value,
+                              })
+                            }
                             placeholder="e.g., Electronics, Furniture"
                           />
                         </div>
@@ -674,7 +810,12 @@ export default function SchedulePage() {
                           <Input
                             id="weight"
                             value={newSchedule.weight}
-                            onChange={(e) => setNewSchedule({ ...newSchedule, weight: e.target.value })}
+                            onChange={(e) =>
+                              setNewSchedule({
+                                ...newSchedule,
+                                weight: e.target.value,
+                              })
+                            }
                             placeholder="e.g., 15 tons"
                           />
                         </div>
@@ -684,7 +825,12 @@ export default function SchedulePage() {
                         <Textarea
                           id="notes"
                           value={newSchedule.notes}
-                          onChange={(e) => setNewSchedule({ ...newSchedule, notes: e.target.value })}
+                          onChange={(e) =>
+                            setNewSchedule({
+                              ...newSchedule,
+                              notes: e.target.value,
+                            })
+                          }
                           placeholder="Additional delivery instructions..."
                           rows={3}
                         />
@@ -772,19 +918,30 @@ export default function SchedulePage() {
                   </TableHeader>
                   <TableBody>
                     {filteredSchedules.map((schedule) => (
-                      <TableRow key={schedule.id} className="border-primary-light">
+                      <TableRow
+                        key={schedule.id}
+                        className="border-primary-light"
+                      >
                         <TableCell>
                           <div>
-                            <div className="font-medium text-primary-dark">{schedule.id}</div>
-                            <div className="text-sm text-muted-foreground">{schedule.deliveryId}</div>
+                            <div className="font-medium text-primary-dark">
+                              {schedule.id}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {schedule.deliveryId}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Navigation className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <div className="text-sm font-medium">{schedule.from}</div>
-                              <div className="text-xs text-muted-foreground">→ {schedule.to}</div>
+                              <div className="text-sm font-medium">
+                                {schedule.from}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                → {schedule.to}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -793,7 +950,9 @@ export default function SchedulePage() {
                             <div>
                               <div className="flex items-center gap-1">
                                 <Warehouse className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-sm font-medium">Dock {schedule.dock}</span>
+                                <span className="text-sm font-medium">
+                                  Dock {schedule.dock}
+                                </span>
                               </div>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Timer className="h-3 w-3" />
@@ -803,7 +962,9 @@ export default function SchedulePage() {
                               </div>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <CalendarDays className="h-3 w-3" />
-                                <span>{new Date(schedule.date).toLocaleDateString()}</span>
+                                <span>
+                                  {new Date(schedule.date).toLocaleDateString()}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -816,8 +977,12 @@ export default function SchedulePage() {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="text-sm font-medium">{schedule.driver.name}</div>
-                              <div className="text-xs text-muted-foreground">{schedule.vehicle}</div>
+                              <div className="text-sm font-medium">
+                                {schedule.driver.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {schedule.vehicle}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -829,27 +994,43 @@ export default function SchedulePage() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="text-sm font-medium">{schedule.cargo}</div>
-                            <div className="text-xs text-muted-foreground">{schedule.weight}</div>
+                            <div className="text-sm font-medium">
+                              {schedule.cargo}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {schedule.weight}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getPriorityColor(schedule.priority)}>
-                            {schedule.priority.charAt(0).toUpperCase() + schedule.priority.slice(1)}
+                          <Badge
+                            className={getPriorityColor(schedule.priority)}
+                          >
+                            {schedule.priority.charAt(0).toUpperCase() +
+                              schedule.priority.slice(1)}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(schedule.status)}>
                             {getStatusIcon(schedule.status)}
-                            {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1).replace("-", " ")}
+                            {schedule.status.charAt(0).toUpperCase() +
+                              schedule.status.slice(1).replace("-", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary-light">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-primary hover:bg-primary-light"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500 hover:bg-red-50"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -863,21 +1044,27 @@ export default function SchedulePage() {
               {filteredSchedules.length === 0 && (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-primary-dark mb-2">No schedules found</h3>
+                  <h3 className="text-lg font-medium text-primary-dark mb-2">
+                    No schedules found
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm || statusFilter !== "all" || dateFilter !== "all"
+                    {searchTerm ||
+                    statusFilter !== "all" ||
+                    dateFilter !== "all"
                       ? "Try adjusting your search or filters"
                       : "Get started by creating your first schedule"}
                   </p>
-                  {!searchTerm && statusFilter === "all" && dateFilter === "all" && (
-                    <Button
-                      onClick={() => setIsAddScheduleOpen(true)}
-                      className="bg-primary hover:bg-primary-dark text-white"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create First Schedule
-                    </Button>
-                  )}
+                  {!searchTerm &&
+                    statusFilter === "all" &&
+                    dateFilter === "all" && (
+                      <Button
+                        onClick={() => setIsAddScheduleOpen(true)}
+                        className="bg-primary hover:bg-primary-dark text-white"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create First Schedule
+                      </Button>
+                    )}
                 </div>
               )}
             </CardContent>
@@ -885,5 +1072,5 @@ export default function SchedulePage() {
         </main>
       </div>
     </div>
-  )
+  );
 }
